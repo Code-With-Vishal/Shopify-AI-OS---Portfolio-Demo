@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopify AI OS</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: #1a1a2e; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 34px; height: 34px; background: #fff1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-text { color: #fff; font-size: 15px; font-weight: 600; }
+  .logo-sub { color: #ffffff88; font-size: 12px; }
+  .status-pill { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: #d1fae5; color: #065f46; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+
+  /* MAIN */
+  .main { max-width: 860px; margin: 0 auto; padding: 28px 20px; }
+
+  /* METRIC CARDS */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .metric { background: #eeeee8; border-radius: 12px; padding: 16px 18px; }
+  .metric-label { font-size: 11px; color: #888; margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-val { font-size: 24px; font-weight: 600; color: #1a1a2e; line-height: 1.1; }
+  .metric-sub { font-size: 12px; color: #999; margin-top: 3px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: 9px 18px; font-size: 13px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #666; font-weight: 500; display: flex; align-items: center; gap: 7px; transition: all 0.15s; }
+  .tab:hover { background: #f0f0ea; color: #1a1a2e; }
+  .tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .tab-icon { font-size: 15px; }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* GRID */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } .metrics { grid-template-columns: 1fr; } }
+
+  /* CARDS */
+  .card { background: #fff; border: 1px solid #e5e5e0; border-radius: 14px; padding: 18px 20px; }
+  .card-label { font-size: 11px; color: #888; margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* INPUTS */
+  textarea, input[type="text"] { width: 100%; font-size: 13px; font-family: inherit; border: 1px solid #e0e0d8; border-radius: 8px; padding: 10px 12px; background: #fafaf7; color: #1a1a1a; outline: none; transition: border 0.15s; }
+  textarea { min-height: 110px; resize: vertical; }
+  textarea:focus, input[type="text"]:focus { border-color: #1a1a2e; background: #fff; }
+
+  /* BUTTON */
+  .run-btn { margin-top: 12px; width: 100%; padding: 10px; font-size: 13px; cursor: pointer; border-radius: 9px; background: #1a1a2e; color: #fff; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 7px; transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.01em; }
+  .run-btn:hover { opacity: 0.88; }
+  .run-btn:active { transform: scale(0.98); }
+  .run-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* OUTPUT */
+  .output-box { min-height: 110px; font-size: 13px; color: #333; line-height: 1.7; white-space: pre-wrap; }
+  .placeholder { color: #bbb; font-style: italic; font-size: 13px; }
+
+  /* SPINNER */
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CART ITEMS */
+  .cart-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .cart-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid #e5e5e0; border-radius: 9px; cursor: pointer; font-size: 13px; transition: all 0.12s; background: #fafaf7; }
+  .cart-item:hover { background: #f0f0ea; border-color: #ccc; }
+  .cart-item.selected { border-color: #1a1a2e; background: #f0f0ea; }
+  .cart-item-icon { font-size: 17px; }
+  .cart-item-name { flex: 1; font-weight: 500; }
+  .cart-item-price { font-weight: 600; color: #1a1a2e; }
+
+  /* CART MESSAGES */
+  .msg-list { display: flex; flex-direction: column; gap: 10px; }
+  .msg { padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.65; }
+  .msg.step1 { background: #dbeafe; color: #1e3a5f; }
+  .msg.step2 { background: #fef3c7; color: #78350f; }
+  .msg.step3 { background: #d1fae5; color: #064e3b; }
+  .msg-tag { font-size: 11px; font-weight: 700; margin-bottom: 4px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* PRODUCT OUTPUT */
+  .output-sections { display: flex; flex-direction: column; gap: 12px; }
+  .out-section-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .out-content { font-size: 13px; color: #333; line-height: 1.65; padding: 9px 11px; background: #fafaf7; border: 1px solid #e5e5e0; border-radius: 8px; min-height: 38px; white-space: pre-wrap; }
+
+  /* FIELD */
+  .prod-field { margin-bottom: 10px; }
+  .prod-field label { display: block; font-size: 12px; color: #777; margin-bottom: 5px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">🤖</div>
+    <div>
+      <div class="logo-text">Shopify AI OS</div>
+      <div class="logo-sub">3-agent automation system</div>
+    </div>
+  </div>
+  <div class="status-pill"><span class="dot"></span>All agents live</div>
+</div>
+
+<div class="main">
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Agent 1</div>
+      <div class="metric-val">Support</div>
+      <div class="metric-sub">Auto-reply bot</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Agent 2</div>
+      <div class="metric-val">Cart</div>
+      <div class="metric-sub">Recovery sequences</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Agent 3</div>
+      <div class="metric-val">Content</div>
+      <div class="metric-sub">Product descriptions</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('support')">
+      <span class="tab-icon">🎧</span> Customer Support
+    </button>
+    <button class="tab" onclick="switchTab('cart')">
+      <span class="tab-icon">🛒</span> Cart Recovery
+    </button>
+    <button class="tab" onclick="switchTab('product')">
+      <span class="tab-icon">✍️</span> Product Content
+    </button>
+  </div>
+
+  <!-- SUPPORT TAB -->
+  <div id="tab-support" class="panel active">
+    <div class="row">
+      <div class="card">
+        <div class="card-label">Customer Query</div>
+        <textarea id="support-input" placeholder="e.g. Hi, I ordered 3 days ago and haven't received any shipping update. Order #1042. Can you help?"></textarea>
+        <button class="run-btn" id="support-btn" onclick="runSupport()">
+          ⚡ Generate Reply
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-label">AI Response</div>
+        <div class="output-box" id="support-output"><span class="placeholder">AI reply will appear here...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART TAB -->
+  <div id="tab-cart" class="panel">
+    <div class="row">
+      <div class="card">
+        <div class="card-label">Select Abandoned Cart</div>
+        <div class="cart-items">
+          <div class="cart-item" onclick="selectCart(this,'Wireless Noise-Cancelling Headphones','$89.99')">
+            <span class="cart-item-icon">🎧</span>
+            <span class="cart-item-name">Wireless Headphones</span>
+            <span class="cart-item-price">$89.99</span>
+          </div>
+          <div class="cart-item" onclick="selectCart(this,'Organic Bamboo Yoga Mat','$54.00')">
+            <span class="cart-item-icon">🧘</span>
+            <span class="cart-item-name">Bamboo Yoga Mat</span>
+            <span class="cart-item-price">$54.00</span>
+          </div>
+          <div class="cart-item" onclick="selectCart(this,'Minimalist Leather Wallet','$35.00')">
+            <span class="cart-item-icon">👜</span>
+            <span class="cart-item-name">Leather Wallet</span>
+            <span class="cart-item-price">$35.00</span>
+          </div>
+        </div>
+        <button class="run-btn" id="cart-btn" onclick="runCart()">
+          💬 Generate Recovery Sequence
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-label">WhatsApp Recovery Sequence</div>
+        <div id="cart-output"><span class="placeholder">3-message sequence will appear here...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT TAB -->
+  <div id="tab-product" class="panel">
+    <div class="row">
+      <div class="card">
+        <div class="card-label">Product Details</div>
+        <div class="prod-field">
+          <label>Product Name</label>
+          <input type="text" id="prod-name" placeholder="e.g. Himalayan Salt Lamp" />
+        </div>
+        <div class="prod-field">
+          <label>Key Features (comma separated)</label>
+          <input type="text" id="prod-features" placeholder="e.g. hand-carved, natural pink salt, warm glow" />
+        </div>
+        <div class="prod-field">
+          <label>Target Audience</label>
+          <input type="text" id="prod-audience" placeholder="e.g. wellness enthusiasts, home decor lovers" />
+        </div>
+        <button class="run-btn" id="product-btn" onclick="runProduct()">
+          ✨ Generate All Content
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-label">Generated Content</div>
+        <div class="output-sections">
+          <div>
+            <div class="out-section-title">SEO Title</div>
+            <div class="out-content" id="out-title"><span class="placeholder">—</span></div>
+          </div>
+          <div>
+            <div class="out-section-title">Product Description</div>
+            <div class="out-content" id="out-desc"><span class="placeholder">—</span></div>
+          </div>
+          <div>
+            <div class="out-section-title">Instagram Caption</div>
+            <div class="out-content" id="out-ig"><span class="placeholder">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedCart = null;
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const idx = ['support','cart','product'].indexOf(name);
+    document.querySelectorAll('.tab')[idx].classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  function selectCart(el, name, price) {
+    document.querySelectorAll('.cart-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCart = { name, price };
+  }
+
+  function setLoading(btnId, loading, label) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? '<div class="spinner"></div> Running agent...'
+      : label;
+  }
+
+  async function callOpenAI(systemPrompt, userMessage) {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ systemPrompt, userMessage })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.choices?.[0]?.message?.content || 'No response';
+  }
+
+  async function runSupport() {
+    const query = document.getElementById('support-input').value.trim();
+    if (!query) return;
+    setLoading('support-btn', true);
+    document.getElementById('support-output').innerHTML = '<span class="placeholder">Generating...</span>';
+    try {
+      const reply = await callOpenAI(
+        'You are a friendly, professional Shopify store customer support agent. Write a warm, helpful, concise reply. Resolve the issue or explain next steps clearly. Sign off as "The Support Team". Keep it under 100 words.',
+        'Customer message: ' + query
+      );
+      document.getElementById('support-output').textContent = reply;
+    } catch(e) {
+      document.getElementById('support-output').innerHTML = '<span class="placeholder">Error: ' + e.message + '</span>';
+    }
+    setLoading('support-btn', false, '⚡ Generate Reply');
+  }
+
+  async function runCart() {
+    if (!selectedCart) { alert('Please select a cart item first.'); return; }
+    setLoading('cart-btn', true);
+    document.getElementById('cart-output').innerHTML = '<span class="placeholder">Generating sequence...</span>';
+    try {
+      const reply = await callOpenAI(
+        'You are a WhatsApp cart recovery specialist. Write exactly 3 short messages to recover an abandoned cart. Format strictly as:\n\nMessage 1 (1 hour): [text]\n\nMessage 2 (24 hours): [text]\n\nMessage 3 (48 hours): [text]\n\nEach max 2 sentences. Friendly, not pushy. Subtle urgency. No links.',
+        'Product: ' + selectedCart.name + ' | Price: ' + selectedCart.price
+      );
+      const tags = ['1 hour later', '24 hours later', '48 hours later'];
+      const classes = ['step1', 'step2', 'step3'];
+      const lines = reply.split('\n').filter(l => /message \d/i.test(l));
+      let html = '<div class="msg-list">';
+      lines.forEach((line, i) => {
+        if (i < 3) {
+          const text = line.replace(/^message \d+\s*\([^)]+\):\s*/i, '');
+          html += `<div class="msg ${classes[i]}"><div class="msg-tag">${tags[i]}</div>${text}</div>`;
+        }
+      });
+      if (lines.length === 0) {
+        html += `<div class="msg step1"><div class="msg-tag">sequence</div>${reply}</div>`;
+      }
+      html += '</div>';
+      document.getElementById('cart-output').innerHTML = html;
+    } catch(e) {
+      document.getElementById('cart-output').innerHTML = '<span class="placeholder">Error: ' + e.message + '</span>';
+    }
+    setLoading('cart-btn', false, '💬 Generate Recovery Sequence');
+  }
+
+  async function runProduct() {
+    const name = document.getElementById('prod-name').value.trim();
+    const features = document.getElementById('prod-features').value.trim();
+    const audience = document.getElementById('prod-audience').value.trim();
+    if (!name) return;
+    setLoading('product-btn', true);
+    ['out-title','out-desc','out-ig'].forEach(id => {
+      document.getElementById(id).innerHTML = '<span class="placeholder">Generating...</span>';
+    });
+    try {
+      const reply = await callOpenAI(
+        'You are a Shopify product copywriter. Return ONLY this exact format with no extra text:\n\nSEO TITLE: [title under 60 chars]\n\nDESCRIPTION: [2-3 sentence product description]\n\nINSTAGRAM: [Instagram caption with 3 hashtags]',
+        'Product: ' + name + '\nFeatures: ' + features + '\nAudience: ' + audience
+      );
+      const titleMatch = reply.match(/SEO TITLE:\s*(.+)/i);
+      const descMatch = reply.match(/DESCRIPTION:\s*([\s\S]+?)(?=INSTAGRAM:|$)/i);
+      const igMatch = reply.match(/INSTAGRAM:\s*([\s\S]+)/i);
+      document.getElementById('out-title').textContent = titleMatch ? titleMatch[1].trim() : '—';
+      document.getElementById('out-desc').textContent = descMatch ? descMatch[1].trim() : '—';
+      document.getElementById('out-ig').textContent = igMatch ? igMatch[1].trim() : '—';
+    } catch(e) {
+      document.getElementById('out-title').innerHTML = '<span class="placeholder">Error: ' + e.message + '</span>';
+    }
+    setLoading('product-btn', false, '✨ Generate All Content');
+  }
+</script>
+</body>
+</html>
