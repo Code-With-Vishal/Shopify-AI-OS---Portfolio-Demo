@@ -90,6 +90,55 @@
   /* FIELD */
   .prod-field { margin-bottom: 10px; }
   .prod-field label { display: block; font-size: 12px; color: #777; margin-bottom: 5px; font-weight: 500; }
+
+  /* NEW STYLES: Analytics Bar */
+  .analytics-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: #eeeee8; border-radius: 12px; padding: 16px 18px; }
+  .stat-label { font-size: 11px; color: #888; margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-val { font-size: 20px; font-weight: 600; color: #1a1a2e; line-height: 1.1; }
+  .stat-sub { font-size: 12px; color: #666; margin-top: 5px; }
+  .up-arrow { color: #10b981; font-weight: bold; }
+  @media (max-width: 600px) { .analytics-bar { grid-template-columns: 1fr 1fr; } }
+
+  /* NEW STYLES: Layout Split */
+  .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; }
+  .dashboard-left { flex: 7; min-width: 0; }
+  .dashboard-right { flex: 3; min-width: 250px; }
+  @media (max-width: 768px) { .dashboard-layout { flex-direction: column; } .dashboard-right { width: 100%; } }
+
+  /* NEW STYLES: Live Activity */
+  .activity-panel { background: #fff; border: 1px solid #e5e5e0; border-radius: 14px; padding: 16px 0; }
+  .activity-header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 12px; border-bottom: 1px solid #e5e5e0; }
+  .pulsing-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+  .activity-feed { max-height: 420px; overflow-y: auto; scrollbar-width: none; }
+  .activity-feed::-webkit-scrollbar { display: none; }
+  .feed-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f0f0ea; transition: all 0.3s ease; }
+  .feed-item:last-child { border-bottom: none; }
+  .new-item { transform: translateY(-10px); opacity: 0; background: #f8fafc; }
+  .feed-icon { font-size: 16px; }
+  .feed-text { flex: 1; font-size: 12px; color: #333; line-height: 1.4; }
+  .feed-time { font-size: 10px; color: #999; white-space: nowrap; }
+
+  /* NEW STYLES: Orders Panel */
+  .orders-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+  .orders-table th { color: #888; font-weight: 500; padding: 8px 12px; border-bottom: 1px solid #e5e5e0; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10px; }
+  .order-row { cursor: pointer; transition: background 0.15s; }
+  .order-row td { padding: 12px; border-bottom: 1px solid #f0f0ea; }
+  .order-row:hover { background: #fafaf7; }
+  .order-row.selected { background: #f4f4f0; border-left: 3px solid #1a1a2e; }
+  .order-row.selected td:first-child { padding-left: 9px; }
+
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .badge.red { background: #fee2e2; color: #991b1b; }
+  .badge.yellow { background: #fef3c7; color: #92400e; }
+  .badge.green { background: #d1fae5; color: #065f46; }
+
+  .order-detail-card { display: flex; flex-direction: column; }
+  .od-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .od-title { font-weight: 600; font-size: 13px; color: #1a1a2e; }
+  .order-msg { background: #f8fafc; border-left: 3px solid #cbd5e1; padding: 10px 12px; font-size: 12px; color: #475569; font-style: italic; line-height: 1.5; border-radius: 0 8px 8px 0; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -124,109 +173,181 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('support')">
-      <span class="tab-icon">🎧</span> Customer Support
-    </button>
-    <button class="tab" onclick="switchTab('cart')">
-      <span class="tab-icon">🛒</span> Cart Recovery
-    </button>
-    <button class="tab" onclick="switchTab('product')">
-      <span class="tab-icon">✍️</span> Product Content
-    </button>
-  </div>
-
-  <!-- SUPPORT TAB -->
-  <div id="tab-support" class="panel active">
-    <div class="row">
-      <div class="card">
-        <div class="card-label">Customer Query</div>
-        <textarea id="support-input" placeholder="e.g. Hi, I ordered 3 days ago and haven't received any shipping update. Order #1042. Can you help?"></textarea>
-        <button class="run-btn" id="support-btn" onclick="runSupport()">
-          ⚡ Generate Reply
-        </button>
-      </div>
-      <div class="card">
-        <div class="card-label">AI Response</div>
-        <div class="output-box" id="support-output"><span class="placeholder">AI reply will appear here...</span></div>
-      </div>
+  <!-- ADDITION 1: Analytics Bar -->
+  <div class="analytics-bar">
+    <div class="stat-card">
+      <div class="stat-label">Revenue Recovered</div>
+      <div class="stat-val">$12,840</div>
+      <div class="stat-sub"><span class="up-arrow">↑</span> 18% this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Support Tickets Resolved</div>
+      <div class="stat-val">342</div>
+      <div class="stat-sub">avg 43s response</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Carts Recovered</div>
+      <div class="stat-val">89</div>
+      <div class="stat-sub">34% recovery rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Products Generated</div>
+      <div class="stat-val">217</div>
+      <div class="stat-sub">across 3 stores</div>
     </div>
   </div>
 
-  <!-- CART TAB -->
-  <div id="tab-cart" class="panel">
-    <div class="row">
-      <div class="card">
-        <div class="card-label">Select Abandoned Cart</div>
-        <div class="cart-items">
-          <div class="cart-item" onclick="selectCart(this,'Wireless Noise-Cancelling Headphones','$89.99')">
-            <span class="cart-item-icon">🎧</span>
-            <span class="cart-item-name">Wireless Headphones</span>
-            <span class="cart-item-price">$89.99</span>
-          </div>
-          <div class="cart-item" onclick="selectCart(this,'Organic Bamboo Yoga Mat','$54.00')">
-            <span class="cart-item-icon">🧘</span>
-            <span class="cart-item-name">Bamboo Yoga Mat</span>
-            <span class="cart-item-price">$54.00</span>
-          </div>
-          <div class="cart-item" onclick="selectCart(this,'Minimalist Leather Wallet','$35.00')">
-            <span class="cart-item-icon">👜</span>
-            <span class="cart-item-name">Leather Wallet</span>
-            <span class="cart-item-price">$35.00</span>
-          </div>
-        </div>
-        <button class="run-btn" id="cart-btn" onclick="runCart()">
-          💬 Generate Recovery Sequence
+  <!-- ADDITION 2: Layout Wrap -->
+  <div class="dashboard-layout">
+    <div class="dashboard-left">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('orders')">
+          <span class="tab-icon">📦</span> Orders
+        </button>
+        <button class="tab" onclick="switchTab('support')">
+          <span class="tab-icon">🎧</span> Customer Support
+        </button>
+        <button class="tab" onclick="switchTab('cart')">
+          <span class="tab-icon">🛒</span> Cart Recovery
+        </button>
+        <button class="tab" onclick="switchTab('product')">
+          <span class="tab-icon">✍️</span> Product Content
         </button>
       </div>
-      <div class="card">
-        <div class="card-label">WhatsApp Recovery Sequence</div>
-        <div id="cart-output"><span class="placeholder">3-message sequence will appear here...</span></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- PRODUCT TAB -->
-  <div id="tab-product" class="panel">
-    <div class="row">
-      <div class="card">
-        <div class="card-label">Product Details</div>
-        <div class="prod-field">
-          <label>Product Name</label>
-          <input type="text" id="prod-name" placeholder="e.g. Himalayan Salt Lamp" />
-        </div>
-        <div class="prod-field">
-          <label>Key Features (comma separated)</label>
-          <input type="text" id="prod-features" placeholder="e.g. hand-carved, natural pink salt, warm glow" />
-        </div>
-        <div class="prod-field">
-          <label>Target Audience</label>
-          <input type="text" id="prod-audience" placeholder="e.g. wellness enthusiasts, home decor lovers" />
-        </div>
-        <button class="run-btn" id="product-btn" onclick="runProduct()">
-          ✨ Generate All Content
-        </button>
-      </div>
-      <div class="card">
-        <div class="card-label">Generated Content</div>
-        <div class="output-sections">
-          <div>
-            <div class="out-section-title">SEO Title</div>
-            <div class="out-content" id="out-title"><span class="placeholder">—</span></div>
+      <!-- ADDITION 3: ORDERS TAB PANEL -->
+      <div id="tab-orders" class="panel active">
+        <div class="row">
+          <div class="card">
+            <div class="card-label">Recent Orders</div>
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <!-- Filled via JS -->
+              </tbody>
+            </table>
           </div>
-          <div>
-            <div class="out-section-title">Product Description</div>
-            <div class="out-content" id="out-desc"><span class="placeholder">—</span></div>
-          </div>
-          <div>
-            <div class="out-section-title">Instagram Caption</div>
-            <div class="out-content" id="out-ig"><span class="placeholder">—</span></div>
+          <div class="card order-detail-card" id="order-detail-panel">
+            <div class="card-label">Order Details</div>
+            <div class="placeholder">Select an order to view details.</div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+
+      <!-- SUPPORT TAB -->
+      <div id="tab-support" class="panel">
+        <div class="row">
+          <div class="card">
+            <div class="card-label">Customer Query</div>
+            <textarea id="support-input" placeholder="e.g. Hi, I ordered 3 days ago and haven't received any shipping update. Order #1042. Can you help?"></textarea>
+            <button class="run-btn" id="support-btn" onclick="runSupport()">
+              ⚡ Generate Reply
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-label">AI Response</div>
+            <div class="output-box" id="support-output"><span class="placeholder">AI reply will appear here...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CART TAB -->
+      <div id="tab-cart" class="panel">
+        <div class="row">
+          <div class="card">
+            <div class="card-label">Select Abandoned Cart</div>
+            <div class="cart-items">
+              <div class="cart-item" onclick="selectCart(this,'Wireless Noise-Cancelling Headphones','$89.99')">
+                <span class="cart-item-icon">🎧</span>
+                <span class="cart-item-name">Wireless Headphones</span>
+                <span class="cart-item-price">$89.99</span>
+              </div>
+              <div class="cart-item" onclick="selectCart(this,'Organic Bamboo Yoga Mat','$54.00')">
+                <span class="cart-item-icon">🧘</span>
+                <span class="cart-item-name">Bamboo Yoga Mat</span>
+                <span class="cart-item-price">$54.00</span>
+              </div>
+              <div class="cart-item" onclick="selectCart(this,'Minimalist Leather Wallet','$35.00')">
+                <span class="cart-item-icon">👜</span>
+                <span class="cart-item-name">Leather Wallet</span>
+                <span class="cart-item-price">$35.00</span>
+              </div>
+            </div>
+            <button class="run-btn" id="cart-btn" onclick="runCart()">
+              💬 Generate Recovery Sequence
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-label">WhatsApp Recovery Sequence</div>
+            <div id="cart-output"><span class="placeholder">3-message sequence will appear here...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCT TAB -->
+      <div id="tab-product" class="panel">
+        <div class="row">
+          <div class="card">
+            <div class="card-label">Product Details</div>
+            <div class="prod-field">
+              <label>Product Name</label>
+              <input type="text" id="prod-name" placeholder="e.g. Himalayan Salt Lamp" />
+            </div>
+            <div class="prod-field">
+              <label>Key Features (comma separated)</label>
+              <input type="text" id="prod-features" placeholder="e.g. hand-carved, natural pink salt, warm glow" />
+            </div>
+            <div class="prod-field">
+              <label>Target Audience</label>
+              <input type="text" id="prod-audience" placeholder="e.g. wellness enthusiasts, home decor lovers" />
+            </div>
+            <button class="run-btn" id="product-btn" onclick="runProduct()">
+              ✨ Generate All Content
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-label">Generated Content</div>
+            <div class="output-sections">
+              <div>
+                <div class="out-section-title">SEO Title</div>
+                <div class="out-content" id="out-title"><span class="placeholder">—</span></div>
+              </div>
+              <div>
+                <div class="out-section-title">Product Description</div>
+                <div class="out-content" id="out-desc"><span class="placeholder">—</span></div>
+              </div>
+              <div>
+                <div class="out-section-title">Instagram Caption</div>
+                <div class="out-content" id="out-ig"><span class="placeholder">—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- end dashboard-left -->
+
+    <!-- ADDITION 2: Live Activity Feed -->
+    <div class="dashboard-right">
+      <div class="activity-panel">
+        <div class="activity-header">
+          <div class="card-label" style="margin-bottom:0;">Live Activity</div>
+          <div class="pulsing-dot"></div>
+        </div>
+        <div class="activity-feed" id="activity-feed">
+          <!-- Filled via JS -->
+        </div>
+      </div>
+    </div> <!-- end dashboard-right -->
+
+  </div> <!-- end dashboard-layout -->
+</div> <!-- end main -->
 
 <script>
   let selectedCart = null;
@@ -234,7 +355,7 @@
   function switchTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    const idx = ['support','cart','product'].indexOf(name);
+    const idx = ['orders', 'support', 'cart', 'product'].indexOf(name);
     document.querySelectorAll('.tab')[idx].classList.add('active');
     document.getElementById('tab-' + name).classList.add('active');
   }
@@ -271,6 +392,10 @@
     if (!query) return;
     setLoading('support-btn', true);
     document.getElementById('support-output').innerHTML = '<span class="placeholder">Generating...</span>';
+    
+    // Add activity
+    addActivity('🤖', 'Support agent replied to Order query');
+
     try {
       const reply = await callOpenAI(
         'You are a friendly, professional Shopify store customer support agent. Write a warm, helpful, concise reply. Resolve the issue or explain next steps clearly. Sign off as "The Support Team". Keep it under 100 words.',
@@ -287,6 +412,10 @@
     if (!selectedCart) { alert('Please select a cart item first.'); return; }
     setLoading('cart-btn', true);
     document.getElementById('cart-output').innerHTML = '<span class="placeholder">Generating sequence...</span>';
+    
+    // Add activity
+    addActivity('🛒', 'Cart recovery sent — ' + selectedCart.name);
+
     try {
       const reply = await callOpenAI(
         'You are a WhatsApp cart recovery specialist. Write exactly 3 short messages to recover an abandoned cart. Format strictly as:\n\nMessage 1 (1 hour): [text]\n\nMessage 2 (24 hours): [text]\n\nMessage 3 (48 hours): [text]\n\nEach max 2 sentences. Friendly, not pushy. Subtle urgency. No links.',
@@ -322,6 +451,10 @@
     ['out-title','out-desc','out-ig'].forEach(id => {
       document.getElementById(id).innerHTML = '<span class="placeholder">Generating...</span>';
     });
+    
+    // Add activity
+    addActivity('✍️', 'Product copy generated — ' + name);
+
     try {
       const reply = await callOpenAI(
         'You are a Shopify product copywriter. Return ONLY this exact format with no extra text:\n\nSEO TITLE: [title under 60 chars]\n\nDESCRIPTION: [2-3 sentence product description]\n\nINSTAGRAM: [Instagram caption with 3 hashtags]',
@@ -338,6 +471,110 @@
     }
     setLoading('product-btn', false, '✨ Generate All Content');
   }
+
+  // ADDITION 3: Mock Orders
+  const mockOrders = [
+    { id: '#1042', name: 'Sarah M.', status: 'Needs Reply', statusType: 'red', val: '$89.99', msg: 'Hi, I ordered 3 days ago and haven\'t received any shipping update. Order #1042. Can you help?' },
+    { id: '#1041', name: 'James K.', status: 'Resolved', statusType: 'green', val: '$124.00', msg: 'Thank you for the quick replacement!' },
+    { id: '#1040', name: 'Priya S.', status: 'Cart Abandoned', statusType: 'yellow', val: '$54.00', msg: '' },
+    { id: '#1039', name: 'Tom R.', status: 'Needs Reply', statusType: 'red', val: '$210.00', msg: 'My order #1039 arrived damaged. What is the return policy?' },
+    { id: '#1038', name: 'Anna L.', status: 'Resolved', statusType: 'green', val: '$35.00', msg: 'Perfect, got it.' },
+    { id: '#1037', name: 'Marcus B.', status: 'Cart Abandoned', statusType: 'yellow', val: '$67.50', msg: '' },
+    { id: '#1036', name: 'Lisa C.', status: 'Resolved', statusType: 'green', val: '$156.00', msg: 'Looks good, thanks!' },
+    { id: '#1035', name: 'David W.', status: 'Resolved', statusType: 'green', val: '$43.00', msg: 'The refund was processed correctly.' }
+  ];
+
+  function renderOrders() {
+    let html = '';
+    mockOrders.forEach((o, i) => {
+      let icon = o.statusType === 'red' ? '🔴 ' : o.statusType === 'yellow' ? '🟡 ' : '✅ ';
+      html += `<tr class="order-row" onclick="selectOrder(${i}, this)">
+        <td>${o.id}</td><td>${o.name}</td>
+        <td><span class="badge ${o.statusType}">${icon}${o.status}</span></td>
+        <td>${o.val}</td>
+      </tr>`;
+    });
+    document.getElementById('orders-tbody').innerHTML = html;
+  }
+
+  let currentOrder = null;
+  function selectOrder(idx, el) {
+    document.querySelectorAll('.order-row').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+    currentOrder = mockOrders[idx];
+    
+    let actionBtn = '';
+    let msgBlock = '';
+    if (currentOrder.msg && currentOrder.statusType === 'red') {
+        msgBlock = `<div class="order-msg">"${currentOrder.msg}"</div>`;
+        actionBtn = `<button class="run-btn" style="margin-top: auto;" onclick="escalateToSupport()">Run Support Agent &rarr;</button>`;
+    } else if (currentOrder.msg) {
+        msgBlock = `<div class="order-msg">"${currentOrder.msg}"</div>`;
+    } else if (currentOrder.statusType === 'yellow') {
+        msgBlock = `<div class="placeholder">No message. User abandoned cart.</div>`;
+    } else {
+        msgBlock = `<div class="placeholder">No messages.</div>`;
+    }
+
+    document.getElementById('order-detail-panel').innerHTML = `
+      <div class="card-label">Order Details</div>
+      <div class="od-header">
+        <div class="od-title">${currentOrder.name} &middot; ${currentOrder.id} &middot; ${currentOrder.val}</div>
+      </div>
+      ${msgBlock}
+      ${actionBtn}
+    `;
+  }
+
+  function escalateToSupport() {
+    if(!currentOrder) return;
+    switchTab('support');
+    const ta = document.getElementById('support-input');
+    ta.value = currentOrder.msg;
+    runSupport();
+  }
+
+  // ADDITION 2: Live Activity Feed
+  const initialActivities = [
+    { icon: '🤖', text: 'Support agent replied to Order #1042', time: '2s ago' },
+    { icon: '🛒', text: 'Cart recovery sent — Wireless Headphones', time: '14s ago' },
+    { icon: '✍️', text: 'Product copy generated — Salt Lamp Pro', time: '1m ago' },
+    { icon: '🤖', text: 'Support agent replied to Order #1039', time: '3m ago' },
+    { icon: '🛒', text: 'Cart recovery sent — Yoga Mat', time: '5m ago' },
+    { icon: '✅', text: 'Order #1041 — customer replied, issue resolved', time: '8m ago' },
+    { icon: '✍️', text: 'Product copy generated — Bamboo Diffuser', time: '12m ago' },
+    { icon: '🛒', text: 'Cart recovery sent — Leather Wallet', time: '18m ago' }
+  ];
+
+  function renderFeed() {
+    let html = '';
+    initialActivities.forEach(a => {
+        html += `<div class="feed-item"><div class="feed-icon">${a.icon}</div><div class="feed-text">${a.text}</div><div class="feed-time">${a.time}</div></div>`;
+    });
+    document.getElementById('activity-feed').innerHTML = html;
+  }
+
+  function addActivity(icon, text) {
+    const feed = document.getElementById('activity-feed');
+    const newEl = document.createElement('div');
+    newEl.className = 'feed-item new-item';
+    newEl.innerHTML = `<div class="feed-icon">${icon}</div><div class="feed-text">${text}</div><div class="feed-time">just now</div>`;
+    feed.insertBefore(newEl, feed.firstChild);
+    
+    if (feed.children.length > 8) {
+        feed.removeChild(feed.lastChild);
+    }
+    
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            newEl.classList.remove('new-item');
+        });
+    });
+  }
+
+  // Init sections
+  renderOrders();
+  renderFeed();
 </script>
 </body>
 </html>
